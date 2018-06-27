@@ -10,11 +10,11 @@ public class AndroidInput : MonoBehaviour {
 			// Closes settings menu
 			if (ScenesManager.SettingsOpen)
 			{
-				ScenesManager.QuitSettingsMenu();
+				ScenesManager.CloseSettingsMenu();
 			}
 			
 			// Quits application
-			else if (ScenesManager.GetCurrentScene() == ScenesManager.Menu)
+			else if (ScenesManager.CurrentScene == ScenesManager.Menu)
 			{
 				ScenesManager.Quit();
 			}

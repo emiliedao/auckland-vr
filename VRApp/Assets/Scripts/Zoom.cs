@@ -32,11 +32,11 @@ public static class Zoom {
         if (!XRSettings.enabled)
         {
             Vector3 pos = Camera.main.transform.position;
-            Debug.Log("vr zoom factor" + _factor);
-            Debug.Log("cam pos before" + pos.z);
+//            Debug.Log("vr zoom factor" + _factor);
+//            Debug.Log("cam pos before" + pos.z);
 
             Camera.main.transform.position = new Vector3(pos.x, pos.y, Get2DZoom());
-            Debug.Log("cam pos afer " + Camera.main.transform.position.z);
+//            Debug.Log("cam pos afer " + Camera.main.transform.position.z);
         }
     }
     

@@ -1,25 +1,30 @@
 ﻿using System.Collections.Generic;
 using System.Text;
+using Google.ProtocolBuffers;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
 /**
- * This class is use to manage the VR Menu scene
+ * This class is use to manage the main menu
  */
 public class MenuManager : MonoBehaviour
 {
     public Canvas MainCanvas;
     public Canvas Scenes3DCanvas;
     public Canvas Viewer360Canvas;
-    public Canvas ImagePickerCanvas;
+    public Canvas SimpleViewerCanvas;
+    public Canvas StereoViewerCanvas;
     private List<Canvas> _canvasList;
 
     public void Start()
     {
-        _canvasList = new List<Canvas> {MainCanvas, Scenes3DCanvas, Viewer360Canvas, ImagePickerCanvas}; 
-        ShowCanvas(MainCanvas.name);
+        _canvasList = new List<Canvas> {MainCanvas, Scenes3DCanvas, Viewer360Canvas, SimpleViewerCanvas, StereoViewerCanvas};
+        UpdateCanvas();
     }
 
+    /**
+     * Displays a menu canvas
+     */
     public void ShowCanvas(string canvasName)
     {
         foreach (var c in _canvasList)
@@ -27,16 +32,27 @@ public class MenuManager : MonoBehaviour
             if (canvasName == c.name)
             {
                 ScenesManager.ShowCanvas(c);
+                ScenesManager.CurrentMenuCanvas = c.name;
             }
 
             else
             {
                 ScenesManager.HideCanvas(c);
             }   
-        }
-         
+        }    
     }
-    
+
+    /**
+     * Shows the correct current menu canvas
+     */
+    private void UpdateCanvas()
+    {
+        if (ScenesManager.CurrentMenuCanvas == null)
+        {
+            ScenesManager.CurrentMenuCanvas = MainCanvas.name;
+        }
+        ShowCanvas(ScenesManager.CurrentMenuCanvas);
+    }
     
     /*
      * Loads a new scene using its name
@@ -46,23 +62,6 @@ public class MenuManager : MonoBehaviour
     {
         ScenesManager.Load(sceneName);
     }
-
-    public void LoadMenu()
-    {
-        ScenesManager.LoadMenu();
-    }
-    
-#region SettingsMenu
-    public void LoadSettingsMenu()
-    {
-        ScenesManager.LoadSettingsMenu();
-    }
-
-    public void QuitSettingsMenu()
-    {
-        ScenesManager.QuitSettingsMenu();
-    }
-#endregion
     
     public void QuitScene()
     {

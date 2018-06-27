@@ -1,25 +1,18 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
+/**
+ * This class allows to use a native Android plugin to pick up a picture from the smartphone gallery
+ * 
+ * The plugin works well in 2D, but the open gallery pop-up window cannot be rendered in VR
+ * See SimpleFileBrowser plugin instead with OpenFileBrowser function
+ *
+ * If you still wish to use ImagePicker, create a MonoBehaviour script attached to your game object,
+ * and use "ImagePicker.Select(callback)" where @callback (or name it what you want) is another function in your script: "public void callback(string path) { ... }"
+ * This callback function will be called after the image is selected 
+ */
 public static class ImagePicker {
     
-    private static int _maxSize = 2000;
-
-    public static void Test(string path)
-    {
-            Debug.Log( "Image path: " + path );
-            if (path != null)
-            {
-                // Create Texture from selected image
-                Texture2D texture = NativeGallery.LoadImageAtPath(path, _maxSize);
-                if (texture == null)
-                {
-                    Debug.Log("Couldn't load texture from " + path);
-                }
-            }
-//        }
-    }
+    /*private static int _maxSize = 2000;
 
     public static void Select(NativeGallery.MediaPickCallback callback)
     {
@@ -30,5 +23,5 @@ public static class ImagePicker {
 
             Debug.Log("Permission result: " + permission);
         }
-    }
+    }*/
 }

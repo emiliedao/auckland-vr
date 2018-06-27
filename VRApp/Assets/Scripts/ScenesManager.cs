@@ -9,14 +9,16 @@ using UnityEngine.XR;
 public static class ScenesManager
 {
 	public const string Menu = "MainMenu";
-	private static string _currentScene = Menu;
-		
-	public static bool SettingsOpen;
 
-	public static string GetCurrentScene()
+	private static string _currentScene = Menu;
+	public static string CurrentScene
 	{
-		return _currentScene;
+		get { return _currentScene; }
 	}
+
+	public static string CurrentMenuCanvas { get; set; }
+
+	public static bool SettingsOpen;
 
 	/**
 	 * Loads a scene
@@ -35,6 +37,7 @@ public static class ScenesManager
 		Zoom.ResetZoom();
 		SettingsOpen = false;
 		Load(Menu);
+		
 	}
 
 	/**
@@ -49,11 +52,10 @@ public static class ScenesManager
 	}
 
 	/**
-	 * Quits settings menu and returns to last open scene
+	 * Closes settings menu and returns to last open scene
 	 */
-	public static void QuitSettingsMenu()
+	public static void CloseSettingsMenu()
 	{
-		Debug.Log("QuitSettingsMenu");
 		SettingsOpen = false;
 		XRDevice.fovZoomFactor = Zoom.Factor;
 		SceneManager.LoadScene(_currentScene);
@@ -77,6 +79,9 @@ public static class ScenesManager
 		}
 	}
 
+	/**
+	 * Displays a canvas
+	 */
 	public static void ShowCanvas(Canvas canvas)
 	{
 		var canvasGroup = canvas.GetComponent<CanvasGroup>();
@@ -84,6 +89,9 @@ public static class ScenesManager
 		canvasGroup.blocksRaycasts = true;
 	}
 
+	/**
+	 * Hides a canvas
+	 */
 	public static void HideCanvas(Canvas canvas)
 	{
 		var canvasGroup = canvas.GetComponent<CanvasGroup>();
