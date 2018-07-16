@@ -20,6 +20,7 @@ public class ZoomSlider : MonoBehaviour
 		if (!start)
 		{
 			Zoom.Factor = (Slider.value);
+			XRDevice.fovZoomFactor = Zoom.Factor;
 		}
 	}
 	

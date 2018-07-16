@@ -7,10 +7,8 @@ public class CardboardInput : MonoBehaviour {
 	void Update()
 	{
 		// Click on Cardboard button
-		if (Input.GetMouseButtonDown(0) && XRSettings.enabled)
+		if ((Input.GetMouseButtonDown(0) && XRSettings.enabled) || Input.GetKeyDown(KeyCode.Space))
 		{
-			Debug.Log("Cardboard click");
-			Debug.Log("SettingsOpen : " + ScenesManager.SettingsOpen);
 			if (!ScenesManager.SettingsOpen)
 			{
 				ScenesManager.LoadSettingsMenu();

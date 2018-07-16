@@ -98,6 +98,15 @@ public static class ScenesManager
 		canvasGroup.alpha = 0f;
 		canvasGroup.blocksRaycasts = false;
 	}
+	
+	/**
+	 * Sets the pause menu canvas in front of the camera
+	 */
+	public static void CanvasFaceCamera(Canvas canvas, float distance)
+	{
+		canvas.transform.position = Camera.main.transform.position + Camera.main.transform.forward * distance;
+		canvas.transform.rotation = Camera.main.transform.rotation;
+	}
 
 	/**
 	 * Quits application

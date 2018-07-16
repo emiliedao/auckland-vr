@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using UnityEngine;
 using SimpleFileBrowser;
 using UnityEngine.UI;
@@ -8,7 +9,7 @@ using Debug = UnityEngine.Debug;
 
 public class Viewer360 : MonoBehaviour
 {
-    private int _maxSize = 2000;
+    private int _maxSize = 8000;
     private bool _stereo;
 
     // Simple viewer
@@ -19,67 +20,69 @@ public class Viewer360 : MonoBehaviour
     // Stereo viewer
     public Material LeftSphereMaterial;
     public Material RightSphereMaterial;
-    public Toggle UpDownToggle;
+    public Toggle TopBottomToggle;
     public Toggle LeftRightToggle;
-    private static bool _upDownToggle = true;
+//    public Toggle MpoToggle;
+    
+    private static StereoToggle _activeToggle = StereoToggle.TopBottom;
     private static Texture _currentStereoTexture;
+    public static bool Mpo;
+    private static Texture[] _stereoTextures;
     private Viewer _stereoViewer;
+
+    public enum StereoToggle
+    {
+        LeftRight,
+        TopBottom,
+        Mpo
+    };
     
     public void Start()
     {
         FileBrowser.SetFilters(true, new FileBrowser.Filter("Images", ".jpg", ".png"));
         FileBrowser.HideDialog();
         
-         _simpleViewer = new Viewer("360Viewer", new List<Material>() { SphereMaterial }, "360Viewer/default360", 2000);
-        _stereoViewer = new Viewer("360StereoViewer", new List<Material>() { LeftSphereMaterial, RightSphereMaterial}, "360Viewer/stereoPanorama", 4000);
+         _simpleViewer = new Viewer("360Viewer", new List<Material>() { SphereMaterial }, "360Viewer/default360", _maxSize);
+        _stereoViewer = new Viewer("360StereoViewer", new List<Material>() { LeftSphereMaterial, RightSphereMaterial}, "360Viewer/stereoPanorama", _maxSize);
         
-        UpdateTextures();
-    }
-
-    public void Update()
-    {
-        UpdateToggle();
-    }
-
-    public static void OnToggleChange(bool upDown)
-    {
-        _upDownToggle = upDown;
-    }
-    
-    /**
-     * Updates viewers textures
-     */
-    private void UpdateTextures()
-    {
-        if (_currentTexture == null)
-        {
-            _currentTexture = _simpleViewer.InitTexture();
-        }
-
-        if (_currentStereoTexture == null)
-        {
-            _currentStereoTexture = _stereoViewer.InitTexture();
-        }
+        InitTextures();
     }
 
     /**
      * Updates the toggle value and adjusts the settings of the left and right spheres according to the image format
      */
-    private void UpdateToggle()
+    public void Update()
     {
-        UpDownToggle.isOn = _upDownToggle;
-        LeftRightToggle.isOn = !_upDownToggle;
+        // Update toggles 
+        TopBottomToggle.isOn = (_activeToggle == StereoToggle.TopBottom);
+        LeftRightToggle.isOn = (_activeToggle == StereoToggle.LeftRight);
+//        MpoToggle.isOn = (_activeToggle == StereoToggle.Mpo);
         
-        // Settings for Up/Down pair images
-        if (_upDownToggle)
+        UpdateTextureSettings();
+    }
+
+    public static void OnToggleChange(StereoToggle toggle)
+    {
+        _activeToggle = toggle;
+//        Mpo = (_activeToggle == StereoToggle.Mpo);
+        Debug.Log("active toggle = " + toggle);
+    }
+    
+    /**
+     * Initializes viewers textures
+     */
+    private void InitTextures()
+    {
+        // Simple viewer
+        if (_currentTexture == null)
         {
-            SetTextureSettings(0, 0.5f, 1, 0.5f);
+            _currentTexture = _simpleViewer.InitTexture();
         }
 
-        // Settings for Left/Right pair images
-        else
+        if (_currentStereoTexture == null && _stereoTextures == null)
         {
-            SetTextureSettings(0.5f, 0, 0.5f, 1);
+            Debug.Log("init simple current stereo texture");
+            _currentStereoTexture = _stereoViewer.InitTexture();
         }
     }
 
@@ -96,6 +99,30 @@ public class Viewer360 : MonoBehaviour
         // Tiling property: texture is repeated half a time in the vertical/horizontal direction
         LeftSphereMaterial.mainTextureScale = new Vector2(tilingX, tilingY);
         RightSphereMaterial.mainTextureScale = new Vector2(tilingX, tilingY);
+    }
+
+    /**
+     * Updates sphere texture settings according to the selected format (top/bottom, left/right, mpo)
+     */
+    private void UpdateTextureSettings()
+    {
+        // Settings for Up/Down pair images
+        if (_activeToggle == StereoToggle.TopBottom)
+        {
+            SetTextureSettings(0, 0.5f, 1, 0.5f);
+        }
+        
+        // Settings for Left/Right pair images
+        else if (_activeToggle == StereoToggle.LeftRight)
+        {
+            SetTextureSettings(0.5f, 0, 0.5f, 1);  
+        }
+
+        // Settings for MPO file
+//        else if (_activeToggle == StereoToggle.Mpo)
+//        {
+//            SetTextureSettings(0, 0, 1, 1);
+//        }
     }
 
     /**
@@ -122,12 +149,29 @@ public class Viewer360 : MonoBehaviour
         var viewer = _stereo ? _stereoViewer : _simpleViewer;
         if (_stereo)
         {
-            _currentStereoTexture = viewer.ReplaceImage(FileBrowser.Result);
+            string path = FileBrowser.Result;
+            Debug.Log(path);
+//            string extension = Path.GetExtension(path);
+//            Debug.Log("extension: " + extension);
+//            if (extension == ".MPO" || extension == ".mpo")
+//            {
+//                Mpo = true;
+//                var textures = _stereoViewer.ReplaceMpoTextures(path);
+//                _stereoTextures = new Texture[2];
+//                _stereoTextures[0] = textures[0];
+//                _stereoTextures[1] = textures[1];
+//            }
+//
+//            else
+//            {
+//                Mpo = false;
+                _currentStereoTexture = viewer.ReplaceTexture(FileBrowser.Result);    
+//            }
         }
 
         else
         {
-            _currentTexture = viewer.ReplaceImage(FileBrowser.Result);
+            _currentTexture = viewer.ReplaceTexture(FileBrowser.Result);
         }
         ScenesManager.Load(viewer.SceneName);
     }

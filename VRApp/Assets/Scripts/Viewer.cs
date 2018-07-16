@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using SimpleFileBrowser;
 using UnityEngine;
 
@@ -23,6 +24,7 @@ public class Viewer
 		_defaultTexture = defaultTexture;
 		_maxSize = maxSize;
 	}
+	
 
 	public Texture InitTexture()
 	{
@@ -34,7 +36,10 @@ public class Viewer
 		return texture;
 	}
 
-	public Texture ReplaceImage(string path)
+	/**
+	 * Replaces texture 
+	 */
+	public Texture ReplaceTexture(string path)
 	{
 		// Create Texture from selected image
 		var texture = NativeGallery.LoadImageAtPath(path, _maxSize);
@@ -52,4 +57,18 @@ public class Viewer
 		}
 		return texture;
 	}
+
+	public List<Texture2D> ReplaceMpoTextures(string path)
+	{
+		// Extracts 2 images from the MPO file
+		var textures = Mpo.GetMpoImages(path);
+		
+		// Updates left and right sphere textures
+		_materials[0].mainTexture = textures[0];
+		_materials[1].mainTexture = textures[1];
+		
+		return textures;
+	}
+	
+	
 }

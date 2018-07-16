@@ -11,14 +11,15 @@ public class MenuManager : MonoBehaviour
 {
     public Canvas MainCanvas;
     public Canvas Scenes3DCanvas;
+    public Canvas ViewersCanvas;
     public Canvas Viewer360Canvas;
-    public Canvas SimpleViewerCanvas;
-    public Canvas StereoViewerCanvas;
+    public Canvas StereoViewer360Canvas;
+    public Canvas VideoPlayerCanvas;
     private List<Canvas> _canvasList;
 
     public void Start()
     {
-        _canvasList = new List<Canvas> {MainCanvas, Scenes3DCanvas, Viewer360Canvas, SimpleViewerCanvas, StereoViewerCanvas};
+        _canvasList = new List<Canvas> {MainCanvas, Scenes3DCanvas, ViewersCanvas, Viewer360Canvas, StereoViewer360Canvas, VideoPlayerCanvas };
         UpdateCanvas();
     }
 
