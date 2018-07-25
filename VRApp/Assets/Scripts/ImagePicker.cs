@@ -12,7 +12,7 @@
  */
 public static class ImagePicker {
     
-    /*private static int _maxSize = 2000;
+    private static int _maxSize = 2000;
 
     public static void Select(NativeGallery.MediaPickCallback callback)
     {
@@ -23,5 +23,5 @@ public static class ImagePicker {
 
             Debug.Log("Permission result: " + permission);
         }
-    }*/
+    }
 }

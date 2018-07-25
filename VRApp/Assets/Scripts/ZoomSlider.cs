@@ -21,6 +21,7 @@ public class ZoomSlider : MonoBehaviour
 		{
 			Zoom.Factor = (Slider.value);
 			XRDevice.fovZoomFactor = Zoom.Factor;
+			Zoom.SettingsMenuScale = 0.5f / Zoom.Factor;
 		}
 	}
 	

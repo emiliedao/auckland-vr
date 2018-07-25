@@ -9,18 +9,32 @@ using UnityEngine.SceneManagement;
  */
 public class MenuManager : MonoBehaviour
 {
+    public Canvas MenuCanvas;
+    private CanvasManager _menuCanvasManager;
+   
     public Canvas MainCanvas;
     public Canvas Scenes3DCanvas;
     public Canvas ViewersCanvas;
     public Canvas Viewer360Canvas;
     public Canvas StereoViewer360Canvas;
+    public Canvas MpoViewerCanvas;
     public Canvas VideoPlayerCanvas;
     private List<Canvas> _canvasList;
 
     public void Start()
     {
-        _canvasList = new List<Canvas> {MainCanvas, Scenes3DCanvas, ViewersCanvas, Viewer360Canvas, StereoViewer360Canvas, VideoPlayerCanvas };
+        _canvasList = new List<Canvas> { MainCanvas, Scenes3DCanvas, ViewersCanvas, Viewer360Canvas, StereoViewer360Canvas, MpoViewerCanvas, VideoPlayerCanvas };
         UpdateCanvas();
+        _menuCanvasManager = MenuCanvas.GetComponent<CanvasManager>();
+    }
+
+    void Update()
+    {
+        // Click outside of the parent menu canvas
+        if ((Input.GetMouseButtonDown(0) || Input.GetKeyDown(KeyCode.Space)) && !_menuCanvasManager.PointerInside)
+        {
+            CanvasManager.FaceCamera(MenuCanvas, 700);            
+        }
     }
 
     /**
@@ -32,13 +46,13 @@ public class MenuManager : MonoBehaviour
         {
             if (canvasName == c.name)
             {
-                ScenesManager.ShowCanvas(c);
+                CanvasManager.ShowCanvas(c);
                 ScenesManager.CurrentMenuCanvas = c.name;
             }
 
             else
             {
-                ScenesManager.HideCanvas(c);
+                CanvasManager.HideCanvas(c);
             }   
         }    
     }

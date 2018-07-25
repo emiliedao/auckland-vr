@@ -70,42 +70,13 @@ public static class ScenesManager
 	{
 		if ((showInVr && XRSettings.enabled) || (!showInVr && !XRSettings.enabled))
 		{
-			ShowCanvas(canvas);
+			CanvasManager.ShowCanvas(canvas);
 		}
 
 		else
 		{
-			HideCanvas(canvas);
+			CanvasManager.HideCanvas(canvas);
 		}
-	}
-
-	/**
-	 * Displays a canvas
-	 */
-	public static void ShowCanvas(Canvas canvas)
-	{
-		var canvasGroup = canvas.GetComponent<CanvasGroup>();
-		canvasGroup.alpha = 1f;
-		canvasGroup.blocksRaycasts = true;
-	}
-
-	/**
-	 * Hides a canvas
-	 */
-	public static void HideCanvas(Canvas canvas)
-	{
-		var canvasGroup = canvas.GetComponent<CanvasGroup>();
-		canvasGroup.alpha = 0f;
-		canvasGroup.blocksRaycasts = false;
-	}
-	
-	/**
-	 * Sets the pause menu canvas in front of the camera
-	 */
-	public static void CanvasFaceCamera(Canvas canvas, float distance)
-	{
-		canvas.transform.position = Camera.main.transform.position + Camera.main.transform.forward * distance;
-		canvas.transform.rotation = Camera.main.transform.rotation;
 	}
 
 	/**

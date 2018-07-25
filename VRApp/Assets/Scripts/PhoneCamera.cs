@@ -1,31 +1,41 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using QuickStereoServer;
 using UnityEngine;
 using UnityEngine.UI;
+using Viewers;
 
+/// <summary>
+/// This class is used to take pictures with the device where the app is installed, and send them to te quick stereo server for processing
+///  The sending part is done through the class QuickStereoServer/UploadServer
+/// </summary>
 public class PhoneCamera : MonoBehaviour
 {
 
 	private WebCamTexture _backCam;
 	private WebCamTexture _frontCam;
 	private WebCamTexture _currentCam;
-	private Texture _defaultBackground;
 	private Texture _firstPicTexture;
 	private Texture _secPicTexture;
 	
 	private bool _frontCamAvailable;
 	private bool _backCamAvailable;
+	
+	// Indicates if a picture has just been taken
 	private bool _picTaken;
-	private bool _firstPicDone;
+	// Indicates if the first picture was taken
+	private bool _firstPicShot;
 
-	private string _takeFirstPicture = "Take the first picture";
-	private string _takeSecondPicture = "Take the second picture";
-	private string _validate = "Validate?";
-	private string _runVr = "Click to run VR";
+	// UI instructions
+	private const string TakeFirstPic = "Take the first picture";
+	private const string TakeSecondPic = "Take the second picture";
+	private const string ValidatePic = "Validate?";
+	private const string NextAction = "What's next?";
+	private const string UnableFindCam = "Unable to find camera. Please check the camera authorization for the app.";
+	private const string CheckAuthorization = "Please check your device authorization for taking pictures.";
 
 	private UploadServer _uploadServer;
-	private DownloadServer _downloadServer;
 
 	public RawImage Background;
 	public RawImage FirstPic;
@@ -37,7 +47,7 @@ public class PhoneCamera : MonoBehaviour
 	public Button CancelButton;
 	
 	// Buttons after both pics were taken
-	public List<Button> actionsButtons;
+	public List<Button> ActionsButtons;
 	public Button StereoRenderingButton;
 	public Button QuickStereoButton;
 	public Button CancelAllButton;
@@ -47,14 +57,21 @@ public class PhoneCamera : MonoBehaviour
 	private bool _uploaded;
 	private bool _downloaded;
 	
-	void Start ()
+	IEnumerator Start ()
 	{
+		// Does not seem to work on Android. Authorization must be done manually	
+		yield return Application.RequestUserAuthorization(UserAuthorization.WebCam);
+		if (!Application.HasUserAuthorization(UserAuthorization.WebCam))
+		{
+			TopBarText.text = CheckAuthorization;
+		}
+
 		UpdateButtons();
-		actionsButtons = new List<Button>() { StereoRenderingButton, QuickStereoButton, CancelAllButton };
+		ActionsButtons = new List<Button>() { StereoRenderingButton, QuickStereoButton, CancelAllButton };
 		ShowActionButtons(false);
-		_defaultBackground = Background.texture;
 		WebCamDevice[] devices = WebCamTexture.devices;
 
+		// No camera detected
 		if (devices.Length == 0)
 		{
 			Debug.Log("No camera detected");
@@ -64,49 +81,52 @@ public class PhoneCamera : MonoBehaviour
 
 		else
 		{
-			foreach (var device in devices)
-			{
-				if (!device.isFrontFacing)
-				{
-					_backCam = new WebCamTexture(device.name, Screen.width, Screen.height);
-					_backCamAvailable = true;
-				}
-
-				else
-				{
-					_frontCam = new WebCamTexture(device.name, Screen.width, Screen.height);
-					_frontCamAvailable = true;
-				}
-			}
-
-			if (_backCamAvailable || _frontCamAvailable)
+			if (FindCamera(devices))
 			{
 				// Priority to back cam
 				_currentCam = _backCamAvailable ? _backCam : _frontCam;
 				_currentCam.Play();
 				Background.texture = _currentCam;
 			}
-			
+		
 
 			else
 			{
 				Debug.Log("Unable to find camera");
-				TopBarText.text = "Unable to find camera. Please check the camera authorization for the app.";
+				TopBarText.text = UnableFindCam;
 			}
-			
+		
 			StartCoroutine(EnableXR.SwitchTo2D());
+		}		
+	}
+
+	/// <summary>
+	/// Finds the back/front cameras and stores them as attributes 
+	/// </summary>
+	/// <param name="devices">Webcam devices detected</param>
+	/// <returns>True if at least one camera was found (back or front)</returns>
+	bool FindCamera(WebCamDevice[] devices)
+	{
+		foreach (var device in devices)
+		{
+			if (!device.isFrontFacing)
+			{
+				_backCam = new WebCamTexture(device.name, Screen.width, Screen.height);
+				_backCamAvailable = true;
+			}
+
+			else
+			{
+				_frontCam = new WebCamTexture(device.name, Screen.width, Screen.height);
+				_frontCamAvailable = true;
+			}
 		}
+
+		return (_backCamAvailable || _frontCamAvailable);
 	}
 	
 	void Update ()
 	{
-		// Quits scene
-		if (Input.GetKeyDown(KeyCode.Escape))
-		{
-			ScenesManager.LoadMenu();
-			StartCoroutine(EnableXR.SwitchToVR());
-		}
-		
 		// Adapts screen to the device size & orientation
 		if (_currentCam != null && !_picTaken)
 		{
@@ -118,56 +138,51 @@ public class PhoneCamera : MonoBehaviour
 		if (_uploaded)
 		{
 			TopBarText.text = _uploadServer.GetInfo();
-			if (UploadServer.Success())
+			Debug.Log(_uploadServer.Success());
+			if (_uploadServer.Success())
 			{
-				DownloadResults();
-				_downloaded = true;
-			}
-		}
-
-		if (_downloaded)
-		{
-			TopBarText.text = _downloadServer.GetInfo();
-			if (DownloadServer.Success())
-			{
-				TopBarText.text = "Downloaded ok";
+				_uploaded = false;
+				TopBarText.text = "Sent!";
+				_uploadServer.ResetSuccess();
+				ScenesManager.Load("ImportObj");
 			}
 		}
 	}
 
-	/**
-	 * Adapts the screen to the device scale
-	 */
-	public void UpdateScale()
+	/// <summary>
+	/// Adapts the screen to the device scale 
+	/// </summary>
+	private void UpdateScale()
 	{
-		float ratio = (float) _currentCam.width / (float)_currentCam.height;
+		Fitter.aspectRatio = (float) _currentCam.width / _currentCam.height;
 		float scaleY = _currentCam.videoVerticallyMirrored ? -1f : 1f;
 		Background.rectTransform.localScale = new Vector3(1f, scaleY, 1f);
 	}
 
-	/**
-	 * Adapts the screen to the device orientation
-	 */
-	public void UpdateOrientation()
+	/// <summary>
+	/// Adapts the screen to the device orientation 
+	/// </summary>
+	private void UpdateOrientation()
 	{
 		int orientation = -_currentCam.videoRotationAngle;
 		Background.rectTransform.localEulerAngles = new Vector3(0, 0, orientation);
 	}
 
-	/**
-	 * Handles click on take picture button
-	 */
+	/// <summary>
+	/// Handles click on take picture button 
+	/// </summary>
 	public void TakePictureButton()
 	{
 		_picTaken = true;
 		UpdateButtons();
-		TopBarText.text = _validate;
+		TopBarText.text = ValidatePic;
 		StartCoroutine(TakePicture());
 	}
 
-	/**
-	 * Takes a picture by saving the current frame
-	 */
+	/// <summary>
+	/// Takes a picture by saving the current frame 
+	/// </summary>
+	/// <returns></returns>
 	private IEnumerator TakePicture()
 	{
 		yield return new WaitForEndOfFrame(); 
@@ -178,58 +193,63 @@ public class PhoneCamera : MonoBehaviour
 		Background.texture = photo;
 	}
 	
-	/**
-	 * Cancels the picture taken
-	 */
+	/// <summary>
+	/// Cancels the picture taken 
+	/// </summary>
 	public void Cancel()
 	{
 		_picTaken = false;
 		UpdateButtons();
 
-		TopBarText.text = _firstPicDone ? _takeSecondPicture : _takeFirstPicture;
+		TopBarText.text = _firstPicShot ? TakeSecondPic : TakeFirstPic;
 		Background.texture = _currentCam;
 	}
 	
+	/// <summary>
+	/// Cancels the two pictures taken
+	/// This function is called when the user clicks on the "Cancel" button instead of choosing to see the pictures in stereo viewer or send them to the server 
+	/// </summary>
 	public void CancelAll()
 	{
-		_firstPicDone = false;
+		_firstPicShot = false;
 		ShowActionButtons(false);
+		FirstPic.gameObject.SetActive(false);
 		Cancel();
 	}
 
+	/// <summary>
+	/// Initializes the stereo viewer with the two pictures taken and redirects to the stereo viewer scene
+	/// This function is called when the user clicks on the "Stereo rendering" button after having taken the pictures  
+	/// </summary>
 	public void OpenInStereoViewer()
 	{
 		MpoViewer.SetTextures(_firstPicTexture, _secPicTexture);
-		StartCoroutine(EnableXR.SwitchToVR());
 		ScenesManager.Load("StereoViewer");
 	}
 
+	/// <summary>
+	/// Sends the two pictures taken to the quick stereo server for processing
+	/// This function is called when the user clicks on the "Quick stereo server" button after having taken the two pictures  
+	/// </summary>
 	public void SendToQuickStereoServer()
 	{
 		GameObject obj = (GameObject)Instantiate(Resources.Load("Prefabs/UploadServer"));
 		_uploadServer = obj.GetComponent<UploadServer>();
 		_uploadServer.SetImages(_firstPicTexture, _secPicTexture);
+		_uploadServer.ResetSuccess();
 		_uploadServer.Upload();
 		_uploaded = true;
 	}
 
-
-	private void DownloadResults()
-	{
-		GameObject obj = (GameObject)Instantiate(Resources.Load("Prefabs/DownloadServer"));
-		_downloadServer = obj.GetComponent<DownloadServer>();
-		_downloadServer.Download("model");
-	}
-
-	/**
-	 * Validates the picture taken
-	 */
+	/// <summary>
+	/// Validates the picture taken 
+	/// </summary>
 	public void Validate()
 	{
 		// First (left) picture
-		if (!_firstPicDone)
+		if (!_firstPicShot)
 		{
-			_firstPicDone = true;
+			_firstPicShot = true;
 			FirstPic.gameObject.SetActive(true);
 
 			_picTaken = false;
@@ -239,7 +259,7 @@ public class PhoneCamera : MonoBehaviour
 			Color color = FirstPic.color;
 			FirstPic.color = new Color(color.r, color.g, color.b, 0.5f);
 			Background.texture = _currentCam;
-			TopBarText.text = _takeSecondPicture;
+			TopBarText.text = TakeSecondPic;
 		}
 
 		// Second (right) picture
@@ -248,10 +268,13 @@ public class PhoneCamera : MonoBehaviour
 			_secPicTexture = Background.texture;
 			HidePicButtons();
 			ShowActionButtons(true);
-			TopBarText.text = _runVr;
+			TopBarText.text = NextAction;
 		}
 	}
 
+	/// <summary>
+	/// Displays or hide the buttons according to the taking pictures process stage 
+	/// </summary>
 	private void UpdateButtons()
 	{
 		TakePicButton.gameObject.SetActive(!_picTaken);
@@ -259,14 +282,22 @@ public class PhoneCamera : MonoBehaviour
 		CancelButton.gameObject.SetActive(_picTaken);
 	}
 
+	/// <summary>
+	/// Shows the different possible action buttons after the user has taken the two pictures
+	/// The user can choose between "Stereo Rendering", "Quick stereo server" or "Cancel"  
+	/// </summary>
+	/// <param name="show"></param>
 	private void ShowActionButtons(bool show)
 	{
-		foreach (var button in actionsButtons)
+		foreach (var button in ActionsButtons)
 		{
 			button.gameObject.SetActive(show);
 		}
 	}
 
+	/// <summary>
+	/// Hides the buttons used to take a picture and validate or cancel the shooting 
+	/// </summary>
 	private void HidePicButtons()
 	{
 		TakePicButton.gameObject.SetActive(false);

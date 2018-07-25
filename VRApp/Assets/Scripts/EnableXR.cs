@@ -38,7 +38,7 @@ public static class EnableXR {
     }
 
     // Resets camera transform and settings on all enabled eye cameras.
-    static void ResetCameras() {
+    public static void ResetCameras() {
         // Camera looping logic copied from GvrEditorEmulator.cs
         for (int i = 0; i < Camera.allCameras.Length; i++) {
             Camera cam = Camera.allCameras[i];

@@ -5,21 +5,20 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using UnityEngine.XR;
 
-public class VRToggle : MonoBehaviour, IPointerClickHandler
+public class VRToggle : ToggleHandler
 {
-	public Toggle toggle;
 	private static bool enableVR = true;
 	
 	void Update()
 	{
-		toggle.isOn = enableVR;
+		Toggle.isOn = enableVR;
 	}
 
 	/**
 	 * Handles clicks on VR toggle
 	 * This function is used instead of OnValueChanged because the toggle state is reset whenever scenes change
 	 */
-	public void OnPointerClick(PointerEventData eventData)
+	protected override void OnToggleClick()
 	{
 		enableVR = !enableVR;
 		if (enableVR)
@@ -32,5 +31,4 @@ public class VRToggle : MonoBehaviour, IPointerClickHandler
 			StartCoroutine(EnableXR.SwitchTo2D());
 		}
 	}
-
 }

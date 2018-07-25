@@ -6,7 +6,6 @@ using UnityEngine.XR;
  */
 public static class Zoom {
     private static float _factor = XRDevice.fovZoomFactor;
- 
     public static float Factor
     {
         get { return _factor; }
@@ -14,14 +13,22 @@ public static class Zoom {
     }
 
     private static int _2DZoomOffset = 50;
-    
+
+    private static float _settingsMenuScale;
+    public static float SettingsMenuScale
+    {
+        get { return _settingsMenuScale; }
+        set { _settingsMenuScale = value; }
+    }
+
     /**
      * Resets VR zoom
      */
     public static void ResetZoom()
     {
         _factor = 1;
-        XRDevice.fovZoomFactor = 1;
+        XRDevice.fovZoomFactor = 1f;
+        _settingsMenuScale = SettingsMenu.DefaultScale;
     }
 	    	
     /**

@@ -1,53 +1,63 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 using UnityEngine.XR;
 
 public class SettingsMenu : MonoBehaviour
 {
 	private bool _open;
 	public Canvas SettingsMenuCanvas;
+	private CanvasManager _settingsMenuCanvasManager;
 	public GvrReticlePointer Reticle;
+	private static float _defaultScale = 0.5f;
+
+	public static float DefaultScale
+	{
+		get { return _defaultScale; }
+	}
 
 	void Start()
 	{
 		SettingsMenuCanvas.gameObject.SetActive(false);
 		Reticle.gameObject.SetActive(false);
+		
+		Zoom.SettingsMenuScale = _defaultScale;
+		_settingsMenuCanvasManager = SettingsMenuCanvas.GetComponent<CanvasManager>();
 	}
 
 	void Update()
 	{
 		// Click on Cardboard button
-		if ((Input.GetMouseButtonDown(0) && XRSettings.enabled) || Input.GetKeyDown(KeyCode.Space))
+		if (Input.GetMouseButtonDown(0) || Input.GetKeyDown(KeyCode.Space))
 		{
-			if (!_open)
+			if (!SettingsMenuCanvas.gameObject.activeSelf)
 			{
-				_open = true;
-				LoadSettingsMenu();	
+				LoadSettingsMenu();
 			}
-		}
 
-		if (Input.GetKeyDown(KeyCode.Escape))
-		{
-			if (_open)
+			else
 			{
-				CloseSettingsMenu();
+				if (!_settingsMenuCanvasManager.PointerInside)
+				{
+					CloseSettingsMenu();
+				}
 			}
 		}
+		
+		float scale = Zoom.SettingsMenuScale;
+		SettingsMenuCanvas.transform.parent.localScale = new Vector3(scale, scale, scale);
 	}
 
 	private void LoadSettingsMenu()
 	{
-		Debug.Log("open");
 		Reticle.gameObject.SetActive(true);
-		ScenesManager.CanvasFaceCamera(SettingsMenuCanvas, 3);
+		CanvasManager.FaceCamera(SettingsMenuCanvas, 3);
 		SettingsMenuCanvas.gameObject.SetActive(true);
 	}
 
-	public void CloseSettingsMenu()
+	private void CloseSettingsMenu()
 	{
-		Debug.Log("close");
-		_open = false;
 		SettingsMenuCanvas.gameObject.SetActive(false);
 		Reticle.gameObject.SetActive(false);
 	}
