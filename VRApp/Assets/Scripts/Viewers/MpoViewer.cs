@@ -33,13 +33,6 @@ namespace Viewers
 				LeftImage.texture = _leftTexture;
 				RightImage.texture = _rightTexture;
 			}
-
-			// Initializes the viewer with default textures
-			else
-			{
-				LeftImage.texture = (Texture) Resources.Load("360Viewer/left");
-				RightImage.texture = (Texture) Resources.Load("360Viewer/right");
-			}
 		}
 
 		/// <summary>
@@ -51,6 +44,11 @@ namespace Viewers
 		{
 			_leftTexture = left;
 			_rightTexture = right;
+		}
+
+		public static Texture GetTexture()
+		{
+			return _leftTexture;
 		}
 
 	}

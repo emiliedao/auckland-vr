@@ -62,9 +62,9 @@ public class LoadObj : OpenBrowser
 		Debug.Log("Loaded model from server");
 	}
 	
-	protected override void ActionResult()
+	protected override void ActionResult(string path)
 	{
-		GameObject obj = OBJLoader.LoadOBJFile(FileBrowser.Result);
+		GameObject obj = OBJLoader.LoadOBJFile(path);
 		InitObject(obj);
 		Debug.Log("loaded");
 //		CreateSpheres(obj);

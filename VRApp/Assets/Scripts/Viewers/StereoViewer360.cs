@@ -35,11 +35,10 @@ namespace Viewers
             }
         }
         
-        protected override void ActionResult()
+        protected override void ActionResult(string path)
         {
-            string path = FileBrowser.Result;
             Debug.Log(path);
-            _currentTexture = LoadTexture(FileBrowser.Result);
+            _currentTexture = LoadTexture(path);
             LeftSphereMaterial.mainTexture = _currentTexture;
             RightSphereMaterial.mainTexture = _currentTexture;
         }

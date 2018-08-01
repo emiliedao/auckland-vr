@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Text;
 using Google.ProtocolBuffers;
+using SimpleFileBrowser;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -21,6 +22,8 @@ public class MenuManager : MonoBehaviour
     public Canvas VideoPlayerCanvas;
     private List<Canvas> _canvasList;
 
+    public Canvas WarningPopupCanvas;
+
     public void Start()
     {
         _canvasList = new List<Canvas> { MainCanvas, Scenes3DCanvas, ViewersCanvas, Viewer360Canvas, StereoViewer360Canvas, MpoViewerCanvas, VideoPlayerCanvas };
@@ -30,8 +33,8 @@ public class MenuManager : MonoBehaviour
 
     void Update()
     {
-        // Click outside of the parent menu canvas
-        if ((Input.GetMouseButtonDown(0) || Input.GetKeyDown(KeyCode.Space)) && !_menuCanvasManager.PointerInside)
+        // Click outside of the parent menu canvas (and no file browser open)
+        if ((Input.GetMouseButtonDown(0) || Input.GetKeyDown(KeyCode.Space)) && !_menuCanvasManager.PointerInside && !FileBrowser.IsOpen)
         {
             CanvasManager.FaceCamera(MenuCanvas, 700);            
         }
@@ -86,6 +89,16 @@ public class MenuManager : MonoBehaviour
     public void QuitApp()
     {
         ScenesManager.Quit();
+    }
+    
+    public void OpenPopup(Canvas popup)
+    {
+        popup.gameObject.SetActive(true);
+    }
+    
+    public void ClosePopup(Canvas popup)
+    {
+        popup.gameObject.SetActive(false);
     }
 
 }

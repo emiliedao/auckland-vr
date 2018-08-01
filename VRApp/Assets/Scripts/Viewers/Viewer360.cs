@@ -8,13 +8,11 @@ namespace Viewers
 {
     public class Viewer360 : Viewer
     {
-        // Simple viewer
         public Material SphereMaterial;
 
         public RawImage ImagePreview;
         private static Texture _currentTexture;
-
-    
+        
         public void Update()
         {
             ImagePreview.texture = _currentTexture;
@@ -33,9 +31,9 @@ namespace Viewers
             }
         }
 
-        protected override void ActionResult()
+        protected override void ActionResult(string path)
         {
-            _currentTexture = LoadTexture(FileBrowser.Result);
+            _currentTexture = LoadTexture(path);
             SphereMaterial.mainTexture = _currentTexture;
         }
     }

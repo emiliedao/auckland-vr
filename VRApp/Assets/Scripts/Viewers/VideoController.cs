@@ -102,9 +102,9 @@ namespace Viewers
 			StartCoroutine(OpenBrowserCoroutine("Load Video"));
 		}
 
-		protected override void ActionResult()
+		protected override void ActionResult(string path)
 		{
-			_videoPlayer.url = FileBrowser.Result;
+			_videoPlayer.url = path;
 			_videoPlayer.Pause();
 		}
 	}

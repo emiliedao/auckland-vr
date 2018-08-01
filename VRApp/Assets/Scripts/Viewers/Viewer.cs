@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime;
 using SimpleFileBrowser;
 using UnityEngine;
 using UnityEngine.UI;
@@ -26,6 +27,13 @@ namespace Viewers
         public void OpenFileBrowser()
         {
             StartCoroutine(OpenBrowserCoroutine("Load Image"));
+        }
+
+        public void ValidatePopup(Canvas popup)
+        {
+            Debug.Log("Validate");
+            popup.gameObject.SetActive(false);
+            ImagePicker.Select(ActionResult);
         }
 
         /// <summary>

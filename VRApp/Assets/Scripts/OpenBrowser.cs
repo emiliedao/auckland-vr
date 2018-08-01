@@ -12,7 +12,7 @@ public abstract class OpenBrowser : MonoBehaviour
     /// <summary>
     /// This function must be overrided to implement a behaviour after loading a file through the file browser 
     /// </summary>
-    protected abstract void ActionResult();
+    protected abstract void ActionResult(string path);
 
     protected enum FileType
     {
@@ -64,7 +64,8 @@ public abstract class OpenBrowser : MonoBehaviour
     {
         yield return FileBrowser.WaitForLoadDialog(false, null, title, "OK");
         Debug.Log(FileBrowser.Success + " " + FileBrowser.Result);
+        
         if (!FileBrowser.Success) yield break;
-        ActionResult();
+        ActionResult(FileBrowser.Result);
     }
 }

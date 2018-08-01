@@ -10,7 +10,7 @@ public class SettingsMenu : MonoBehaviour
 	public Canvas SettingsMenuCanvas;
 	private CanvasManager _settingsMenuCanvasManager;
 	public GvrReticlePointer Reticle;
-	private static float _defaultScale = 0.5f;
+	private static float _defaultScale = 0.3f;
 
 	public static float DefaultScale
 	{
@@ -22,6 +22,8 @@ public class SettingsMenu : MonoBehaviour
 		SettingsMenuCanvas.gameObject.SetActive(false);
 		Reticle.gameObject.SetActive(false);
 		
+		SettingsMenuCanvas.transform.parent.localScale = new Vector3(_defaultScale, _defaultScale, _defaultScale);
+
 		Zoom.SettingsMenuScale = _defaultScale;
 		_settingsMenuCanvasManager = SettingsMenuCanvas.GetComponent<CanvasManager>();
 	}
@@ -33,30 +35,30 @@ public class SettingsMenu : MonoBehaviour
 		{
 			if (!SettingsMenuCanvas.gameObject.activeSelf)
 			{
-				LoadSettingsMenu();
+				Open();
 			}
 
 			else
 			{
 				if (!_settingsMenuCanvasManager.PointerInside)
 				{
-					CloseSettingsMenu();
+					Close();
 				}
 			}
 		}
 		
-		float scale = Zoom.SettingsMenuScale;
-		SettingsMenuCanvas.transform.parent.localScale = new Vector3(scale, scale, scale);
+//		float scale = Zoom.SettingsMenuScale;
+//		SettingsMenuCanvas.transform.parent.localScale = new Vector3(scale, scale, scale);
 	}
 
-	private void LoadSettingsMenu()
+	private void Open()
 	{
 		Reticle.gameObject.SetActive(true);
-		CanvasManager.FaceCamera(SettingsMenuCanvas, 3);
+		CanvasManager.FaceCamera(SettingsMenuCanvas, 2);
 		SettingsMenuCanvas.gameObject.SetActive(true);
 	}
 
-	private void CloseSettingsMenu()
+	public void Close()
 	{
 		SettingsMenuCanvas.gameObject.SetActive(false);
 		Reticle.gameObject.SetActive(false);
